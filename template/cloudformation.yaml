@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS Cost Optimization Automation Resources
+
+Resources:
+  StopEC2Schedule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Schedule to stop non-prod instances at 6 PM daily
+      ScheduleExpression: "cron(0 18 * * ? *)"
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt StopEC2Function.Arn
+          Id: "StopEC2Target"
+
+  EBSCleanupSchedule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Schedule to cleanup unattached EBS volumes weekly
+      ScheduleExpression: "cron(0 0 ? * SUN *)"
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt DeleteEBSFunction.Arn
+          Id: "DeleteEBSTarget"
+
+  EIPCleanupSchedule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Schedule to cleanup unused EIPs weekly
+      ScheduleExpression: "cron(0 0 ? * SUN *)"
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt ReleaseEIPFunction.Arn
+          Id: "ReleaseEIPTarget"
